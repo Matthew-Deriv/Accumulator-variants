@@ -1,5 +1,9 @@
-# Object file
-*.o
-
-# Ada Library Information
-*.ali
+# Ignored files
+.DS_Store
+*.csv
+*.npy
+.DS_Store
+.ipynb_checkpoints
+.csv
+*.csv
+*.pkl
