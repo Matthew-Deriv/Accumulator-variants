@@ -1,17 +1,18 @@
 // Game configuration
 const INITIAL_SPOT = 100;
-const INITIAL_BARRIER_GAP = 5;
-const SHRINK_RATE = 0.2; // Rate at which barriers shrink per tick
+const INITIAL_BARRIER_PERCENTAGE = 2.5; // ±1.5%
+const PERCENTAGE_SHRINK_RATE = 0.3; // Percentage points to shrink per tick (1.5% -> 1.3% -> 1.1% etc)
 const TICK_INTERVAL = 1000; // 1 second per tick
 const WIN_TICKS = 10; // Number of ticks to survive
-const DRIFT_STD = 1; // Standard deviation for random price movements
+const DRIFT_STD = 1; // Standard deviation for random price movements (increased for more volatility)
 
 // Game state
 let gameRunning = false;
 let currentTick = 0;
 let spotPrices = [];
-let upperBarrier = [];
-let lowerBarrier = [];
+let upperBarriers = [];
+let lowerBarriers = [];
+let currentBarrierPercentage = INITIAL_BARRIER_PERCENTAGE;
 let chart = null;
 let gameInterval = null;
 
@@ -19,6 +20,11 @@ let gameInterval = null;
 const buyBtn = document.getElementById('buyBtn');
 const sellBtn = document.getElementById('sellBtn');
 const status = document.getElementById('status');
+const spotValue = document.getElementById('spotValue');
+const upperValue = document.getElementById('upperValue');
+const lowerValue = document.getElementById('lowerValue');
+const upperPercent = document.getElementById('upperPercent');
+const lowerPercent = document.getElementById('lowerPercent');
 
 // Initialize Chart.js
 function initializeChart() {
@@ -31,7 +37,7 @@ function initializeChart() {
                 {
                     label: 'Spot Price',
                     data: [],
-                    borderColor: 'rgb(75, 192, 192)',
+                    borderColor: 'rgb(33, 150, 243)',
                     tension: 0.1,
                     fill: false
                 },
@@ -59,7 +65,12 @@ function initializeChart() {
             },
             scales: {
                 y: {
-                    beginAtZero: false
+                    beginAtZero: false,
+                    min: 90,
+                    max: 110,
+                    ticks: {
+                        stepSize: 1
+                    }
                 }
             },
             plugins: {
@@ -86,73 +97,125 @@ function generateNextSpot() {
     return lastSpot + drift;
 }
 
-// Update barriers
-function updateBarriers() {
-    const lastUpper = upperBarrier[upperBarrier.length - 1];
-    const lastLower = lowerBarrier[lowerBarrier.length - 1];
-    const newUpper = lastUpper - SHRINK_RATE;
-    const newLower = lastLower + SHRINK_RATE;
-    upperBarrier.push(newUpper);
-    lowerBarrier.push(newLower);
+// Calculate barrier values based on current spot and percentage
+function calculateBarriers(spot) {
+    const upperBarrier = spot * (1 + currentBarrierPercentage / 100);
+    const lowerBarrier = spot * (1 - currentBarrierPercentage / 100);
+    return { upperBarrier, lowerBarrier };
+}
+
+// Update display values
+function updateDisplayValues(spot, upper, lower) {
+    spotValue.textContent = spot.toFixed(2);
+    upperValue.textContent = upper.toFixed(2);
+    lowerValue.textContent = lower.toFixed(2);
+    upperPercent.textContent = `+${currentBarrierPercentage.toFixed(2)}`;
+    lowerPercent.textContent = `-${currentBarrierPercentage.toFixed(2)}`;
 }
 
 // Check if spot price breached barriers
-function checkBarriers() {
-    const spot = spotPrices[spotPrices.length - 1];
-    const upper = upperBarrier[upperBarrier.length - 1];
-    const lower = lowerBarrier[lowerBarrier.length - 1];
-    return spot >= upper || spot <= lower;
+function checkBarriers(spot) {
+    const currentUpperBarrier = upperBarriers[upperBarriers.length - 1];
+    const currentLowerBarrier = lowerBarriers[lowerBarriers.length - 1];
+    return spot >= currentUpperBarrier || spot <= currentLowerBarrier;
 }
 
 // Update chart data
 function updateChart() {
     chart.data.labels = Array.from({ length: spotPrices.length }, (_, i) => i);
     chart.data.datasets[0].data = spotPrices;
-    chart.data.datasets[1].data = upperBarrier;
-    chart.data.datasets[2].data = lowerBarrier;
+    chart.data.datasets[1].data = upperBarriers;
+    chart.data.datasets[2].data = lowerBarriers;
+    
     chart.update();
 }
 
-// Game tick function
 function gameTick() {
     currentTick++;
-    
+
     // Generate new spot price
     const newSpot = generateNextSpot();
     spotPrices.push(newSpot);
-    
-    // Update barriers
-    updateBarriers();
-    
-    // Update chart
+
+    // Check win/lose conditions against previous tick's barriers
+    if (currentTick > 0) {
+        const prevUpperBarrier = upperBarriers[upperBarriers.length - 1];
+        const prevLowerBarrier = lowerBarriers[lowerBarriers.length - 1];
+
+        // Debugging: Log values for analysis
+        console.log('Current Tick:', currentTick);
+        console.log('Spot Price:', newSpot.toFixed(2));
+        console.log('Prev Upper Barrier:', prevUpperBarrier?.toFixed(2));
+        console.log('Prev Lower Barrier:', prevLowerBarrier?.toFixed(2));
+
+        // Detect breaches with matched precision
+        const breachedUpper = newSpot >= prevUpperBarrier;
+        const breachedLower = newSpot <= prevLowerBarrier;
+
+        console.log('Breached Upper Barrier?', breachedUpper);
+        console.log('Breached Lower Barrier?', breachedLower);
+
+        // If breach detected, log and handle loss
+        if (breachedUpper || breachedLower) {
+            console.log(`Loss detected! Breached ${breachedUpper ? "upper" : "lower"} barrier.`);
+            
+            // Final chart update
+            updateChart();
+
+            // End the game after a loss
+            endGame('lose');
+            return;
+        }
+    }
+
+    // Shrink barrier percentage for new barriers
+    currentBarrierPercentage = Math.max(
+        INITIAL_BARRIER_PERCENTAGE - currentTick * PERCENTAGE_SHRINK_RATE,
+        0.1 // Minimum percentage
+    );
+
+    // Calculate and store new barriers
+    const { upperBarrier, lowerBarrier } = calculateBarriers(newSpot);
+    upperBarriers.push(upperBarrier);
+    lowerBarriers.push(lowerBarrier);
+
+    // Update display with the latest values
+    updateDisplayValues(newSpot, upperBarrier, lowerBarrier);
     updateChart();
-    
-    // Update status
+
+    // Status update
     status.textContent = `Survived ${currentTick} ticks`;
-    
-    // Check win/lose conditions
-    if (checkBarriers()) {
-        endGame('lose');
-    } else if (currentTick >= WIN_TICKS) {
+
+    // Winning condition
+    if (currentTick >= WIN_TICKS) {
         endGame('win');
     }
 }
 
 // Start game
 function startGame() {
-    // Reset game state
     gameRunning = true;
     currentTick = 0;
+
+    // Initialize the spot prices and barriers
     spotPrices = [INITIAL_SPOT];
-    upperBarrier = [INITIAL_SPOT + INITIAL_BARRIER_GAP];
-    lowerBarrier = [INITIAL_SPOT - INITIAL_BARRIER_GAP];
-    
+    upperBarriers = [null]; // Placeholder
+    lowerBarriers = [null]; // Placeholder
+
     // Update UI
     buyBtn.disabled = true;
     sellBtn.disabled = false;
     status.textContent = 'Game started!';
     status.className = 'status';
-    
+
+    // Initialize display
+    const { upperBarrier, lowerBarrier } = calculateBarriers(INITIAL_SPOT);
+    updateDisplayValues(INITIAL_SPOT, upperBarrier, lowerBarrier);
+
+    // Append the first barriers for the offset logic
+    upperBarriers.push(upperBarrier);
+    lowerBarriers.push(lowerBarrier);
+
     // Start game loop
     updateChart();
     gameInterval = setInterval(gameTick, TICK_INTERVAL);
@@ -179,6 +242,10 @@ function endGame(result) {
 // Initialize game
 function init() {
     initializeChart();
+    
+    // Initial display values
+    const { upperBarrier, lowerBarrier } = calculateBarriers(INITIAL_SPOT);
+    updateDisplayValues(INITIAL_SPOT, upperBarrier, lowerBarrier);
     
     // Event listeners
     buyBtn.addEventListener('click', startGame);
