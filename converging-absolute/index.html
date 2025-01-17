@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relative Barrier Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="info">
+            <div class="current-values">
+                <div>Spot Price: <span id="spotValue">100.00</span></div>
+                <div>Upper Barrier: <span id="upperValue">105.00</span> (<span id="upperPercent">+5.00</span>%)</div>
+                <div>Lower Barrier: <span id="lowerValue">95.00</span> (<span id="lowerPercent">-5.00</span>%)</div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="priceChart"></canvas>
+        </div>
+        <div class="controls">
+            <button id="buyBtn" class="btn">Buy</button>
+            <button id="sellBtn" class="btn" disabled>Sell</button>
+        </div>
+        <div id="status" class="status">Click Buy to start</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

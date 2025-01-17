@@ -1,0 +1,120 @@
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.info {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.current-values {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    font-size: 14px;
+}
+
+.current-values div {
+    padding: 8px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+#spotValue {
+    color: #2196F3;
+    font-weight: bold;
+}
+
+#upperValue, #upperPercent {
+    color: #f44336;
+    font-weight: bold;
+}
+
+#lowerValue, #lowerPercent {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.chart-container {
+    width: 100%;
+    height: 400px;
+    margin-bottom: 20px;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#buyBtn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#buyBtn:hover {
+    background-color: #45a049;
+}
+
+#buyBtn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#sellBtn {
+    background-color: #f44336;
+    color: white;
+}
+
+#sellBtn:hover {
+    background-color: #e53935;
+}
+
+#sellBtn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.status {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.status.win {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.status.lose {
+    background-color: #f44336;
+    color: white;
+}
