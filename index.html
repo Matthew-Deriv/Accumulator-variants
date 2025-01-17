@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barrier Games</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+        }
+        .game-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .game-link {
+            padding: 1rem 2rem;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .game-link:hover {
+            background-color: #0056b3;
+        }
+        .description {
+            margin-top: 2rem;
+            color: #666;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Barrier Games</h1>
+        <div class="game-links">
+            <a href="converging-relative/index.html" class="game-link">Converging Relative</a>
+            <a href="converging-absolute/index.html" class="game-link">Converging Absolute</a>
+        </div>
+        <div class="description">
+            <p>Choose a variant of the barrier game to play:</p>
+            <p><strong>Converging Relative:</strong> Barriers move relative to the current price.</p>
+            <p><strong>Converging Absolute:</strong> Barriers move with fixed absolute values.</p>
+        </div>
+    </div>
+</body>
+</html>
